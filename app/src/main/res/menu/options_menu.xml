@@ -9,7 +9,7 @@
         android:icon="@drawable/ic_search"
         android:title="@string/search_string"
         android:actionLayout="@layout/activity_main"
-       app:showAsAction="collapseActionView|ifRoom"
+        app:showAsAction="collapseActionView|ifRoom"
         app:actionViewClass="android.widget.SearchView" />
 
 </menu>

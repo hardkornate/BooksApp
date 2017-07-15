@@ -2,16 +2,16 @@ package com.example.android.booksapp;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
-import java.util.List;
+import static com.example.android.booksapp.MainActivity.BOOK_LOADER_ID;
 
-import static android.app.SearchManager.USER_QUERY;
 
 public class SearchableActivity extends AppCompatActivity {
 
-    private static final String BOOKSEARCH =
+    public static final String BOOKSEARCH =
             "GET https://www.googleapis.com/books/v1/volumes?q=";
-
+    private static String LOG_TAG = SearchableActivity.class.getSimpleName();
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,12 +28,21 @@ public class SearchableActivity extends AppCompatActivity {
     }
 
     private void handleIntent(Intent intent) {
-        if (intent != null){
-            String mQuery = BOOKSEARCH.concat(intent.getStringExtra("USER_QUERY"));
-            Bundle bundle = intent.getExtras();
-            bundle.putString("QUERY", mQuery);
-            getLoaderManager().restartLoader(0, bundle, null);
+        if (intent.getExtras() != null) {
+
+            try {
+                Bundle bundle = intent.getExtras();
+                String query = (bundle.getString("QUERY", "new"));
+                String mQuery = (BOOKSEARCH + query);
+
+                bundle.putString("QUERY", mQuery);
+                super.getLoaderManager().restartLoader(BOOK_LOADER_ID, bundle, (android.app.LoaderManager.LoaderCallbacks<BookLoader>) this);
+            } catch (NullPointerException e) {
+                Log.e(LOG_TAG, "Null pointer from QUERY at handleIntent", e);
+            }
+
+        }
+
 
         }
     }
-}

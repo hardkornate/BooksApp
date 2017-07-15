@@ -15,12 +15,8 @@
  */
 package com.example.android.booksapp;
 
-import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.SearchView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,7 +36,8 @@ import java.util.List;
 /**
  * Helper methods related to requesting and receiving earthquake data from USGS.
  */
-public final class QueryUtils {
+
+final class QueryUtils {
 
     /** Tag for the log messages */
     private static final String LOG_TAG = QueryUtils.class.getSimpleName();
@@ -59,7 +56,8 @@ public final class QueryUtils {
      *
      */
 
-    public static List<Book> fetchBookData(String requestUrl) {
+
+    static List<Book> fetchBookData(String requestUrl) {
         // Create URL object
         URL url = createUrl(requestUrl);
 
