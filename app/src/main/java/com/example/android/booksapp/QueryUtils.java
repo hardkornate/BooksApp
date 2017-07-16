@@ -51,7 +51,7 @@ final class QueryUtils {
     }
 
     /**
-     * Query the USGS dataset and return a list of {@link Book} objects.
+     * Query the Google books dataset and return a list of {@link Book} objects.
      *
      *
      */
@@ -69,10 +69,10 @@ final class QueryUtils {
             Log.e(LOG_TAG, "Problem making the HTTP request.", e);
         }
 
-        // Extract relevant fields from the JSON response and create a list of {@link Earthquake}s
+        // Extract relevant fields from the JSON response and create a list of {@link Books}
         List<Book> books = extractFeatureFromJson(jsonResponse);
 
-        // Return the list of {@link Earthquake}s
+        // Return the list of {@link Books}s
         return books;
     }
 
@@ -161,7 +161,7 @@ final class QueryUtils {
             return null;
         }
 
-        // Create an empty ArrayList that we can start adding earthquakes to
+        // Create an empty ArrayList that we can start adding bookss to
         List<Book> books = new ArrayList<>();
 
         // Try to parse the JSON response string. If there's a problem with the way the JSON
@@ -179,7 +179,7 @@ final class QueryUtils {
             // For each book in the bookArray, create an {@link Book} object
             for (int i = 0; i < bookArray.length(); i++) {
 
-                // Get a single earthquake at position i within the list of earthquakes
+                // Get a single earthquake at position i within the list of books
                 JSONObject currentBook = bookArray.getJSONObject(i);
 
                 // For a given book, extract the JSONObject associated with the
@@ -196,11 +196,11 @@ final class QueryUtils {
                 // Extract the value for the key called "selfLink"
                 String url = properties.getString("selfLink");
 
-                // Create a new {@link Earthquake} object with the magnitude, location, time,
+                // Create a new {@link Book} object with the title, author, url,
                 // and url from the JSON response.
                 Book book = new Book(title, author, url);
 
-                // Add the new {@link Earthquake} to the list of earthquakes.
+                // Add the new {@link Book} to the list of earthquakes.
                 books.add(book);
             }
 
