@@ -195,6 +195,7 @@ final class QueryUtils {
                 if (properties.has("authors")) {
                     // Extract the value for the key called "authors"
                     authors = properties.getJSONArray("authors").toString();
+                    authors = authors.replaceAll("\\W", "");
                 }
 
                 // Create a new {@link Book} object with the title, author, url,

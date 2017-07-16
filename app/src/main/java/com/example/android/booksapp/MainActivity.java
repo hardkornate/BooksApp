@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         // Set the adapter on the {@link ListView}
         bookListView.setAdapter(mAdapter);
 
-        View loadingIndicator = findViewById(R.id.loading_indicator);
+        loadingIndicator = findViewById(R.id.loading_indicator);
         loadingIndicator.setVisibility(View.GONE);
 
         // Set an item click listener on the ListView, which sends an intent to a web browser
@@ -74,11 +74,13 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 // Find the current book that was clicked on
                 Book currentBook = mAdapter.getItem(position);
                 // Convert the String URL into a URI object (to pass into the Intent constructor)
-                Uri bookUri = Uri.parse(currentBook.getUrl());
-                // Create a new intent to view the book URI
-                Intent websiteIntent = new Intent(Intent.ACTION_VIEW, bookUri);
-                // Send the intent to launch a new activity
-                startActivity(websiteIntent);
+                if (currentBook.getUrl() != null) {
+                    Uri bookUri = Uri.parse(currentBook.getUrl());
+                    // Create a new intent to view the book URI
+                    Intent websiteIntent = new Intent(Intent.ACTION_VIEW, bookUri);
+                    // Send the intent to launch a new activity
+                    startActivity(websiteIntent);
+                }
             }
         });
     }
@@ -100,10 +102,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         MenuItem searchItem = menu.findItem(R.id.action_search);
         mSearchView = (SearchView) MenuItemCompat.getActionView(searchItem);
-
-        // associate searchable configuration with the SearchView
-        //SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        //mSearchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(this, SearchableActivity.class)));
         mSearchView.setOnQueryTextListener(this);
         mSearchView.setSubmitButtonEnabled(true);
 
