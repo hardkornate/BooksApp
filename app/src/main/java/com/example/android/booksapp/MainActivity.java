@@ -1,8 +1,6 @@
 package com.example.android.booksapp;
 
 import android.app.LoaderManager;
-import android.app.SearchManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
@@ -12,7 +10,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -25,25 +22,24 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.android.booksapp.SearchableActivity.BOOKSEARCH;
 
-public class MainActivity extends AppCompatActivity
-        implements LoaderManager.LoaderCallbacks<List<Book>>, SearchView.OnQueryTextListener {
-    private static final String LOG_TAG = MainActivity.class.getSimpleName();
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<Book>>, SearchView.OnQueryTextListener {
 
-
+    public static final String BOOKSEARCHURL = "https://www.googleapis.com/books/v1/volumes?q=";
     /**
      * Constant value for the earthquake loader ID. We can choose any integer.
      * This really only comes into play if you're using multiple loaders.
      */
     public static final int BOOK_LOADER_ID = 1;
-
+    private static final String LOG_TAG = MainActivity.class.getSimpleName();
     /**
      * Adapter for the list of Books
      */
     private BookAdapter mAdapter;
 
     private SearchView mSearchView;
+    private ListView bookListView;
+    private View loadingIndicator;
 
 
     /**
@@ -58,50 +54,17 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         mSearchView = (SearchView) findViewById(R.id.action_search);
-
-        // Find a reference to the {@link ListView} in the layout
-        final ListView bookListView = (ListView) findViewById(R.id.list);
-
+        bookListView = (ListView) findViewById(R.id.list);
         mEmptyStateTextView = (TextView) findViewById(R.id.empty_view);
         bookListView.setEmptyView(mEmptyStateTextView);
 
         // Create a new adapter that takes an empty list of earthquakes as input
         mAdapter = new BookAdapter(this, new ArrayList<Book>());
-
         // Set the adapter on the {@link ListView}
-        // so the list can be populated in the user interface
         bookListView.setAdapter(mAdapter);
 
         View loadingIndicator = findViewById(R.id.loading_indicator);
         loadingIndicator.setVisibility(View.GONE);
-        // Get a reference to the ConnectivityManager to check state of network connectivity
-        ConnectivityManager connMgr = (ConnectivityManager)
-                getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        // Get details on the currently active default data network
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-
-        // If there is a network connection, fetch data
-        if (networkInfo != null && networkInfo.isConnected() && getIntent().getExtras() != null) {
-            // Get a reference to the LoaderManager, in order to interact with loaders.
-            LoaderManager loaderManager = getLoaderManager();
-
-
-            // Initialize the loader. Pass in the int ID constant defined above and pass in null for
-            // the bundle. Pass in this activity for the LoaderCallbacks parameter (which is valid
-            // because this activity implements the LoaderCallbacks interface).
-            loaderManager.initLoader(BOOK_LOADER_ID, null, this);
-
-        } else {
-            // Otherwise, display error
-            // First, hide loading indicator so error message will be visible
-
-            loadingIndicator.setVisibility(View.GONE);
-
-            // Update empty state with no connection error message
-            mEmptyStateTextView.setText(R.string.no_internet_connection);
-
-        }
 
         // Set an item click listener on the ListView, which sends an intent to a web browser
         // to open a website with more information about the selected book.
@@ -110,20 +73,23 @@ public class MainActivity extends AppCompatActivity
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 // Find the current book that was clicked on
                 Book currentBook = mAdapter.getItem(position);
-
                 // Convert the String URL into a URI object (to pass into the Intent constructor)
                 Uri bookUri = Uri.parse(currentBook.getUrl());
-
                 // Create a new intent to view the book URI
                 Intent websiteIntent = new Intent(Intent.ACTION_VIEW, bookUri);
-
                 // Send the intent to launch a new activity
                 startActivity(websiteIntent);
             }
         });
+    }
 
-
-
+    public boolean isOnline() {
+        // Get a reference to the ConnectivityManager to check state of network connectivity
+        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        // Get details on the currently active default data network
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        // If there is a network connection, fetch data
+        return (networkInfo != null && networkInfo.isConnected());
     }
 
 
@@ -132,57 +98,54 @@ public class MainActivity extends AppCompatActivity
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.options_menu, menu);
 
-
         MenuItem searchItem = menu.findItem(R.id.action_search);
         mSearchView = (SearchView) MenuItemCompat.getActionView(searchItem);
 
         // associate searchable configuration with the SearchView
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        mSearchView.setSearchableInfo(searchManager.getSearchableInfo(
-                new ComponentName(this, SearchableActivity.class)));
-
+        //SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        //mSearchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(this, SearchableActivity.class)));
         mSearchView.setOnQueryTextListener(this);
         mSearchView.setSubmitButtonEnabled(true);
-
 
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onQueryTextSubmit(String query) {
-        Intent searchIntent = new Intent(this, MainActivity.class);
-        searchIntent.putExtra("QUERY", query);
-        searchIntent.setAction(Intent.ACTION_SEARCH);
-
-        startActivity(searchIntent);
-
         return true; // we start the search activity manually
     }
 
     @Override
     public boolean onQueryTextChange(String newText) {
+        if (isOnline()) {
+            // Get a reference to the LoaderManager, in order to interact with loaders
+            Bundle bundle = new Bundle();
+            bundle.putString("QUERY", newText);
+            getLoaderManager().initLoader(BOOK_LOADER_ID, bundle, this);
+            getLoaderManager().restartLoader(BOOK_LOADER_ID, bundle, this);
+        } else {
+            loadingIndicator.setVisibility(View.GONE);
+            // Update empty state with no connection error message
+            mEmptyStateTextView.setText(R.string.no_internet_connection);
+        }
+
         return false;
     }
 
     @Override
     public Loader<List<Book>> onCreateLoader(int i, Bundle bundle) {
 
-        String url = BOOKSEARCH;
+        String query = bundle.getString("QUERY");
+        String url = BOOKSEARCHURL + query;
 
         View loadingIndicator = findViewById(R.id.loading_indicator);
         loadingIndicator.setVisibility(View.VISIBLE);
 
-
-        try {
-            url = bundle.getString("QUERY", "new");
-
-        } catch (NullPointerException e) {
-            Log.e(LOG_TAG, "Null pointer from QUERY", e);
-        }
         return new BookLoader(this, url);
     }
+
     @Override
-    public void onLoadFinished(Loader<List<Book>> loader , List<Book> books) {
+    public void onLoadFinished(Loader<List<Book>> loader, List<Book> books) {
         // Hide loading indicator because the data has been loaded
         View loadingIndicator = findViewById(R.id.loading_indicator);
         loadingIndicator.setVisibility(View.GONE);
@@ -197,8 +160,10 @@ public class MainActivity extends AppCompatActivity
         // data set. This will trigger the ListView to update.
         if (books != null && !books.isEmpty()) {
             mAdapter.addAll(books);
+            mAdapter.notifyDataSetChanged();
         }
     }
+
     @Override
     public void onLoaderReset(Loader<List<Book>> loader) {
         // Loader reset, so we can clear out our existing data.
