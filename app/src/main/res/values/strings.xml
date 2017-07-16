@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name">BooksApp</string>
+    <string name="app_name">Google Books Search</string>
     <string name="no_books">There are no books on the current topic.</string>
     <string name="no_internet_connection">There is no internet connection.</string>
-    <string name="search_hint">Search by book topic</string>
+    <string name="search_hint">Search Google Books by entering a book topic in the search bar.</string>
     <string name="search_string">Google Books</string>
 </resources>

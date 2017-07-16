@@ -178,8 +178,7 @@ final class QueryUtils {
 
                 // Get a single earthquake at position i within the list of books
                 JSONObject currentBook = bookArray.getJSONObject(i);
-                // Extract the value for the key called "selfLink"
-                String url = currentBook.getString("selfLink");
+
                 // For a given book, extract the JSONObject associated with the
                 // key called "volumeInfo", which represents a list of all volumeInfo
                 // for that book.
@@ -188,11 +187,14 @@ final class QueryUtils {
                 // Extract the value for the key called "title"
                 String title = properties.getString("title");
 
+                // Extract the value for the key called "selfLink"
+                String url = properties.getString("canonicalVolumeLink");
+
                 String authors = "N/A";
                 if (properties.has("authors")) {
                     // Extract the value for the key called "authors"
                     authors = properties.getJSONArray("authors").toString();
-                    authors = authors.replaceAll("\\W", "");
+                    authors = authors.replaceAll("[\"\\[\\]]", "");
                 }
 
                 // Create a new {@link Book} object with the title, author, url,
