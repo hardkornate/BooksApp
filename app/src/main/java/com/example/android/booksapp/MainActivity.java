@@ -122,6 +122,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             getLoaderManager().initLoader(BOOK_LOADER_ID, bundle, this);
             getLoaderManager().restartLoader(BOOK_LOADER_ID, bundle, this);
         } else {
+            // Clear the adapter of previous book data
+            mAdapter.clear();
             loadingIndicator.setVisibility(View.GONE);
             // Update empty state with no connection error message
             mEmptyStateTextView.setText(R.string.no_internet_connection);
